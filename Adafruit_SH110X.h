@@ -58,18 +58,6 @@
 #define SH110X_SETHIGHCOLUMN       0x10 ///< Not currently used
 #define SH110X_SETSTARTLINE        0x40 ///< See datasheet
 
-#define SH110X_EXTERNALVCC         0x01 ///< External display voltage source
-#define SH110X_SWITCHCAPVCC        0x02 ///< Gen. display voltage from 3.3V
-
-#define SH110X_RIGHT_HORIZONTAL_SCROLL              0x26 ///< Init rt scroll
-#define SH110X_LEFT_HORIZONTAL_SCROLL               0x27 ///< Init left scroll
-#define SH110X_VERTICAL_AND_RIGHT_HORIZONTAL_SCROLL 0x29 ///< Init diag scroll
-#define SH110X_VERTICAL_AND_LEFT_HORIZONTAL_SCROLL  0x2A ///< Init diag scroll
-#define SH110X_DEACTIVATE_SCROLL                    0x2E ///< Stop scroll
-#define SH110X_ACTIVATE_SCROLL                      0x2F ///< Start scroll
-#define SH110X_SET_VERTICAL_SCROLL_AREA             0xA3 ///< Set scroll range
-
-
 /*!
     @brief  Class that stores state and functions for interacting with
             SH110X OLED displays.
@@ -86,8 +74,7 @@ class Adafruit_SH110X : public Adafruit_MonoOLED {
 
   ~Adafruit_SH110X(void);
 
-  bool      begin(uint8_t switchvcc=SH110X_SWITCHCAPVCC,
-                  uint8_t i2caddr=0x3C, boolean reset=true);
+  bool      begin(uint8_t i2caddr=0x3C, boolean reset=true);
   void         display(void);
 
  private:

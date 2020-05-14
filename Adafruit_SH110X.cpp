@@ -180,16 +180,19 @@ Adafruit_SH110X::~Adafruit_SH110X(void) {
             proceeding.
     @note   MUST call this function before any drawing or updates!
 */
-bool Adafruit_SH110X::begin(uint8_t vcs, uint8_t addr, boolean reset) {
+bool Adafruit_SH110X::begin(uint8_t addr, boolean reset) {
 
   Adafruit_MonoOLED::_init(addr, reset);
 
-  if(HEIGHT > 32) {
-    drawBitmap((WIDTH - splash1_width) / 2, (HEIGHT - splash1_height) / 2,
-      splash1_data, splash1_width, splash1_height, 1);
-  } else {
-    drawBitmap((WIDTH - splash2_width) / 2, (HEIGHT - splash2_height) / 2,
-      splash2_data, splash2_width, splash2_height, 1);
+  setContrast(0x80);
+
+  // the featherwing with 128x64 oled is 'rotated' so to make the splash right, rotate!
+  if (WIDTH == 64 && HEIGHT == 128) {
+    setRotation(1);
+    drawBitmap((HEIGHT - splash2_width) / 2, 
+	       (WIDTH - splash2_height) / 2,
+               splash2_data, splash2_width, splash2_height, 1);
+    setRotation(0);
   }
 
   // Init sequence, make sure its under 32 bytes, or split into multiples!
@@ -245,25 +248,48 @@ void Adafruit_SH110X::display(void) {
   uint8_t pages = ((HEIGHT + 7) / 8);
 
   uint8_t bytes_per_page = WIDTH;
-
   uint16_t maxbuff = i2c_dev->maxBufferSize() - 1;
 
+  Serial.print("Window: (");
+  Serial.print(window_x1);
+  Serial.print(", ");
+  Serial.print(window_y1);
+  Serial.print(" -> (");
+  Serial.print(window_x2);
+  Serial.print(", ");
+  Serial.print(window_y2);
+  Serial.println(")");
+
+  uint8_t first_page = window_y1 / 8;
+  uint8_t last_page = (window_y2+7) / 8;
+  Serial.print("Pages: ");  
+  Serial.print(first_page);
+  Serial.print(" -> ");
+  Serial.println(last_page);
+  pages = min(pages, last_page);
+
+  uint8_t page_start = min(bytes_per_page, window_x1);
+  uint8_t page_end = max(0, window_x2);
+  Serial.print("Page addr: ");  
+  Serial.print(page_start);
+  Serial.print(" -> ");
+  Serial.println(page_end);
+
   if (i2c_dev) { // I2C
-    // how many buffers-worth are we sending?
-    uint8_t buffs = (bytes_per_page / maxbuff);
-    if (count % maxbuff) {
-      buffs++;
-    }
-    Serial.print("Have to send "); Serial.print(buffs); 
-    Serial.println(" buffs per page");
+    // Set high speed clk
+    i2c_dev->setSpeed(i2c_preclk);
 
-    for (uint8_t p=0; p<pages; p++) {
+    for (uint8_t p=first_page; p<pages; p++) {
       uint8_t bytes_remaining = bytes_per_page;
-      
-      Serial.print(F("Writing page addr "));
-      Serial.println(p);
+      ptr = buffer + (uint16_t)p * (uint16_t)bytes_per_page;
+      // fast forward to dirty rectangle beginning
+      ptr += page_start;
+      bytes_remaining -= page_start;
+      // cut off end of dirty rectangle
+      bytes_remaining -= (WIDTH-1) - page_end;
 
-      uint8_t cmd[] = {0x00, SH110X_SETPAGEADDR + p, 0x10, 0x00};
+      uint8_t cmd[] = {0x00, SH110X_SETPAGEADDR + p, 
+		       0x10 + (page_start >> 4), page_start & 0xF};
       i2c_dev->write(cmd, 4);
 
       while (bytes_remaining) {
@@ -276,10 +302,17 @@ void Adafruit_SH110X::display(void) {
 #endif
       }
     }
+    // Set high speed clk
+    i2c_dev->setSpeed(i2c_postclk);
+
   } else { // SPI
     //SH110X_MODE_DATA
     //while(count--) SPIwrite(*ptr++);
   }
-
+  // reset dirty window
+  window_x1 = 1024;
+  window_y1 = 1024;
+  window_x2 = -1;
+  window_y2 = -1;
 }
 
