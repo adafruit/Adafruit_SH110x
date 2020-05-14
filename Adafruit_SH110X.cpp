@@ -92,12 +92,10 @@
     @note   Call the object's begin() function before use -- buffer
             allocation is performed there!
 */
-Adafruit_SH110X::Adafruit_SH110X(uint8_t w, uint8_t h, TwoWire *twi,
-  int8_t rst_pin) :
-  Adafruit_GFX(w, h), buffer(NULL), dcPin(-1), csPin(-1), rstPin(rst_pin)
+Adafruit_SH110X::Adafruit_SH110X(uint16_t w, uint16_t h, TwoWire *twi,
+				 int8_t rst_pin, uint32_t clkDuring, uint32_t clkAfter) :
+  Adafruit_MonoOLED(w, h, twi, rst_pin, clkDuring, clkAfter)
 {
-  i2c_dev = NULL;
-  _theWire = twi;
 }
 
 /*!
@@ -127,12 +125,8 @@ Adafruit_SH110X::Adafruit_SH110X(uint8_t w, uint8_t h, TwoWire *twi,
     @note   Call the object's begin() function before use -- buffer
             allocation is performed there!
 */
-Adafruit_SH110X::Adafruit_SH110X(uint8_t w, uint8_t h,
-  int8_t mosi_pin, int8_t sclk_pin, int8_t dc_pin, int8_t rst_pin,
-  int8_t cs_pin) : Adafruit_GFX(w, h), dcPin(dc_pin), csPin(cs_pin),
-  rstPin(rst_pin) {
-
-  spi_dev = new Adafruit_SPIDevice(cs_pin, sclk_pin, -1, mosi_pin, 1000000);
+Adafruit_SH110X::Adafruit_SH110X(uint16_t w, uint16_t h, int8_t mosi_pin, 
+				 int8_t sclk_pin, int8_t dc_pin, int8_t rst_pin, int8_t cs_pin) : Adafruit_MonoOLED(w, h, mosi_pin, sclk_pin, dc_pin, rst_pin, cs_pin) {
 }
 
 /*!
@@ -161,12 +155,9 @@ Adafruit_SH110X::Adafruit_SH110X(uint8_t w, uint8_t h,
     @note   Call the object's begin() function before use -- buffer
             allocation is performed there!
 */
-Adafruit_SH110X::Adafruit_SH110X(uint8_t w, uint8_t h, SPIClass *spi,
-  int8_t dc_pin, int8_t rst_pin, int8_t cs_pin, uint32_t bitrate) :
-  Adafruit_GFX(w, h), dcPin(dc_pin), csPin(cs_pin), rstPin(rst_pin) {
-
-  spi_dev = new Adafruit_SPIDevice(cs_pin, bitrate, SPI_BITORDER_MSBFIRST, 
-				   SPI_MODE0, spi);
+Adafruit_SH110X::Adafruit_SH110X(uint16_t w, uint16_t h, SPIClass *spi,
+    int8_t dc_pin, int8_t rst_pin, int8_t cs_pin, uint32_t bitrate) :
+  Adafruit_MonoOLED(w, h, spi, dc_pin, rst_pin, cs_pin, bitrate) {
 }
 
 /*!
@@ -181,55 +172,10 @@ Adafruit_SH110X::~Adafruit_SH110X(void) {
   if (i2c_dev) delete i2c_dev;
 }
 
-// LOW-LEVEL UTILS ---------------------------------------------------------
-
-// Issue single byte out SPI, either soft or hardware as appropriate.
-// SPI transaction/selection must be performed in calling function.
-inline void Adafruit_SH110X::SPIwrite(uint8_t d) {
-  spi_dev->transfer(d);
-}
-
-// Issue single command to SH110X, using I2C or hard/soft SPI as needed.
-// Because command calls are often grouped, SPI transaction and selection
-// must be started/ended in calling function for efficiency.
-// This is a private function, not exposed (see ssd1306_command() instead).
-void Adafruit_SH110X::sh110x_command(uint8_t c) {
-  if(i2c_dev) { // I2C
-    uint8_t buf[2] = {0x00, c}; // Co = 0, D/C = 0
-    i2c_dev->write(buf, 2);
-  } else { // SPI (hw or soft) -- transaction started in calling function
-    digitalWrite(dcPin, LOW);
-    spi_dev->write(&c, 1);
-  }
-}
-
-// Issue list of commands to SH110X, same rules as above re: transactions.
-// This is a private function, not exposed.
-bool Adafruit_SH110X::sh110x_commandList(const uint8_t *c, uint8_t n) {
-  if (i2c_dev) { // I2C
-    uint8_t dc_byte = 0x00; // Co = 0, D/C = 0
-    if (! i2c_dev->write(c, n, true, &dc_byte, 1)) {
-      return false;
-    }
-  } else { // SPI -- transaction started in calling function
-    digitalWrite(dcPin, LOW);
-    while(n--) {
-      uint8_t b = pgm_read_byte(c++);
-      spi_dev->write(&b, 1);
-    }
-  }
-  return true;
-}
-
 // ALLOCATE & INIT DISPLAY -------------------------------------------------
 
 /*!
     @brief  Allocate RAM for image buffer, initialize peripherals and pins.
-    @param  vcs
-            VCC selection. Pass SH110X_SWITCHCAPVCC to generate the display
-            voltage (step up) from the 3.3V source, or SH110X_EXTERNALVCC
-            otherwise. Most situations with Adafruit SH110X breakouts will
-            want SH110X_SWITCHCAPVCC.
     @param  addr
             I2C address of corresponding SH110X display (or pass 0 to use
             default of 0x3C for 128x32 display, 0x3D for all others).
@@ -288,8 +234,6 @@ bool Adafruit_SH110X::begin(uint8_t vcs, uint8_t addr, boolean reset) {
       splash2_data, splash2_width, splash2_height, 1);
   }
 
-  vccstate = vcs;
-     
   // Reset SH110X if requested and reset pin specified in constructor
   if(reset && (rstPin >= 0)) {
     pinMode(rstPin, OUTPUT);
@@ -321,107 +265,13 @@ bool Adafruit_SH110X::begin(uint8_t vcs, uint8_t addr, boolean reset) {
     SH110X_DISPLAYON,                    // 0xaf
   };
 
-  if (! sh110x_commandList(init, sizeof(init))) {
+  if (! oled_commandList(init, sizeof(init))) {
     return false;
   }
 
   return true; // Success
 }
 
-// DRAWING FUNCTIONS -------------------------------------------------------
-
-/*!
-    @brief  Set/clear/invert a single pixel. This is also invoked by the
-            Adafruit_GFX library in generating many higher-level graphics
-            primitives.
-    @param  x
-            Column of display -- 0 at left to (screen width - 1) at right.
-    @param  y
-            Row of display -- 0 at top to (screen height -1) at bottom.
-    @param  color
-            Pixel color, one of: SH110X_BLACK, SH110X_WHITE or SH110X_INVERT.
-    @return None (void).
-    @note   Changes buffer contents only, no immediate effect on display.
-            Follow up with a call to display(), or with other graphics
-            commands as needed by one's own application.
-*/
-void Adafruit_SH110X::drawPixel(int16_t x, int16_t y, uint16_t color) {
-  if((x >= 0) && (x < width()) && (y >= 0) && (y < height())) {
-    // Pixel is in-bounds. Rotate coordinates if needed.
-    switch(getRotation()) {
-     case 1:
-      sh110x_swap(x, y);
-      x = WIDTH - x - 1;
-      break;
-     case 2:
-      x = WIDTH  - x - 1;
-      y = HEIGHT - y - 1;
-      break;
-     case 3:
-      sh110x_swap(x, y);
-      y = HEIGHT - y - 1;
-      break;
-    }
-    switch(color) {
-     case SH110X_WHITE:   buffer[x + (y/8)*WIDTH] |=  (1 << (y&7)); break;
-     case SH110X_BLACK:   buffer[x + (y/8)*WIDTH] &= ~(1 << (y&7)); break;
-     case SH110X_INVERSE: buffer[x + (y/8)*WIDTH] ^=  (1 << (y&7)); break;
-    }
-  }
-}
-
-/*!
-    @brief  Clear contents of display buffer (set all pixels to off).
-    @return None (void).
-    @note   Changes buffer contents only, no immediate effect on display.
-            Follow up with a call to display(), or with other graphics
-            commands as needed by one's own application.
-*/
-void Adafruit_SH110X::clearDisplay(void) {
-  memset(buffer, 0, WIDTH * ((HEIGHT + 7) / 8));
-}
-
-/*!
-    @brief  Return color of a single pixel in display buffer.
-    @param  x
-            Column of display -- 0 at left to (screen width - 1) at right.
-    @param  y
-            Row of display -- 0 at top to (screen height -1) at bottom.
-    @return true if pixel is set (usually SH110X_WHITE, unless display invert mode
-            is enabled), false if clear (SH110X_BLACK).
-    @note   Reads from buffer contents; may not reflect current contents of
-            screen if display() has not been called.
-*/
-boolean Adafruit_SH110X::getPixel(int16_t x, int16_t y) {
-  if((x >= 0) && (x < width()) && (y >= 0) && (y < height())) {
-    // Pixel is in-bounds. Rotate coordinates if needed.
-    switch(getRotation()) {
-     case 1:
-      sh110x_swap(x, y);
-      x = WIDTH - x - 1;
-      break;
-     case 2:
-      x = WIDTH  - x - 1;
-      y = HEIGHT - y - 1;
-      break;
-     case 3:
-      sh110x_swap(x, y);
-      y = HEIGHT - y - 1;
-      break;
-    }
-    return (buffer[x + (y / 8) * WIDTH] & (1 << (y & 7)));
-  }
-  return false; // Pixel out of bounds
-}
-
-/*!
-    @brief  Get base address of display buffer for direct reading or writing.
-    @return Pointer to an unsigned 8-bit array, column-major, columns padded
-            to full byte boundary if needed.
-*/
-uint8_t *Adafruit_SH110X::getBuffer(void) {
-  return buffer;
-}
 
 // REFRESH DISPLAY ---------------------------------------------------------
 
@@ -433,17 +283,6 @@ uint8_t *Adafruit_SH110X::getBuffer(void) {
             of graphics commands, as best needed by one's own application.
 */
 void Adafruit_SH110X::display(void) {
-  /*
-  static const uint8_t dlist1[] = {
-    SH110X_PAGEADDR,
-    0,                         // Page start address
-    0xFF,                      // Page end (not really, but works here)
-    SH110X_COLUMNADDR,
-    0 };                       // Column start address
-  sh110x_commandList(dlist1, sizeof(dlist1));
-  sh110x_command(WIDTH - 1); // Column end address
-  */
-
 #if defined(ESP8266)
   // ESP8266 needs a periodic yield() call to avoid watchdog reset.
   // With the limited size of SH110X displays, and the fast bitrate
@@ -497,37 +336,3 @@ void Adafruit_SH110X::display(void) {
 
 }
 
-
-// OTHER HARDWARE SETTINGS -------------------------------------------------
-
-/*!
-    @brief  Enable or disable display invert mode (white-on-black vs
-            black-on-white).
-    @param  i
-            If true, switch to invert mode (black-on-white), else normal
-            mode (white-on-black).
-    @return None (void).
-    @note   This has an immediate effect on the display, no need to call the
-            display() function -- buffer contents are not changed, rather a
-            different pixel mode of the display hardware is used. When
-            enabled, drawing SH110X_BLACK (value 0) pixels will actually draw white,
-            SH110X_WHITE (value 1) will draw black.
-*/
-void Adafruit_SH110X::invertDisplay(boolean i) {
-  sh110x_command(i ? SH110X_INVERTDISPLAY : SH110X_NORMALDISPLAY);
-}
-
-/*!
-    @brief  Dim the display.
-    @param  dim
-            true to enable lower brightness mode, false for full brightness.
-    @return None (void).
-    @note   This has an immediate effect on the display, no need to call the
-            display() function -- buffer contents are not changed.
-*/
-void Adafruit_SH110X::dim(boolean dim) {
-  // the range of contrast to too small to be really useful
-  // it is useful to dim the display
-  sh110x_command(SH110X_SETCONTRAST);
-  sh110x_command(dim ? 0 : contrast);
-}

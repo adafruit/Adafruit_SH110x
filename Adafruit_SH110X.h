@@ -27,6 +27,7 @@
 #include <Wire.h>
 #include <SPI.h>
 #include <Adafruit_GFX.h>
+#include <Adafruit_MonoOLED.h>
 #include <Adafruit_I2CDevice.h>
 #include <Adafruit_SPIDevice.h>
 
@@ -78,13 +79,14 @@
     @brief  Class that stores state and functions for interacting with
             SH110X OLED displays.
 */
-class Adafruit_SH110X : public Adafruit_GFX {
+class Adafruit_SH110X : public Adafruit_MonoOLED {
  public:
   // NEW CONSTRUCTORS -- recommended for new projects
-  Adafruit_SH110X(uint8_t w, uint8_t h, TwoWire *twi=&Wire, int8_t rst_pin=-1);
-  Adafruit_SH110X(uint8_t w, uint8_t h, int8_t mosi_pin, int8_t sclk_pin,
+  Adafruit_SH110X(uint16_t w, uint16_t h, TwoWire *twi=&Wire, int8_t rst_pin=-1,
+		    uint32_t preclk=400000, uint32_t postclk=100000);
+  Adafruit_SH110X(uint16_t w, uint16_t h, int8_t mosi_pin, int8_t sclk_pin,
     int8_t dc_pin, int8_t rst_pin, int8_t cs_pin);
-  Adafruit_SH110X(uint8_t w, uint8_t h, SPIClass *spi,
+  Adafruit_SH110X(uint16_t w, uint16_t h, SPIClass *spi,
     int8_t dc_pin, int8_t rst_pin, int8_t cs_pin, uint32_t bitrate=8000000UL);
 
   ~Adafruit_SH110X(void);
@@ -92,29 +94,8 @@ class Adafruit_SH110X : public Adafruit_GFX {
   bool      begin(uint8_t switchvcc=SH110X_SWITCHCAPVCC,
                   uint8_t i2caddr=0x3C, boolean reset=true);
   void         display(void);
-  void         clearDisplay(void);
-  void         invertDisplay(boolean i);
-  void         dim(boolean dim);
-  void         drawPixel(int16_t x, int16_t y, uint16_t color);
-  boolean      getPixel(int16_t x, int16_t y);
-  uint8_t     *getBuffer(void);
 
  private:
-  void SPIwrite(uint8_t d);
-
-  void         sh110x_command(uint8_t c);
-  bool         sh110x_commandList(const uint8_t *c, uint8_t n);
-
-  Adafruit_SPIDevice    *spi_dev = NULL;
-  Adafruit_I2CDevice    *i2c_dev = NULL;
-  TwoWire *_theWire = NULL;
-  int dcPin, csPin, rstPin;
-  uint8_t     *buffer = NULL;
-  int8_t       i2caddr, vccstate, page_end;
-
-  uint8_t      contrast;    // normal contrast setting for this device
-
-
 };
 
 #endif // _Adafruit_SH110X_H_
