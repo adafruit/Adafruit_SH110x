@@ -24,14 +24,9 @@
 #ifndef _Adafruit_SH110X_H_
 #define _Adafruit_SH110X_H_
 
-#include <Wire.h>
-#include <SPI.h>
-#include <Adafruit_GFX.h>
 #include <Adafruit_MonoOLED.h>
-#include <Adafruit_I2CDevice.h>
-#include <Adafruit_SPIDevice.h>
 
-        /// fit into the SH110X_ naming scheme
+/// fit into the SH110X_ naming scheme
 #define SH110X_BLACK               0    ///< Draw 'off' pixels
 #define SH110X_WHITE               1    ///< Draw 'on' pixels
 #define SH110X_INVERSE             2    ///< Invert pixels

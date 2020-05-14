@@ -35,27 +35,9 @@
  *
  */
 
-#ifdef __AVR__
- #include <avr/pgmspace.h>
-#elif defined(ESP8266) || defined(ESP32)
- #include <pgmspace.h>
-#else
- #define pgm_read_byte(addr) \
-  (*(const unsigned char *)(addr)) ///< PROGMEM workaround for non-AVR
-#endif
-
-#if !defined(__ARM_ARCH) && !defined(ENERGIA) && !defined(ESP8266) && !defined(ESP32) && !defined(__arc__)
- #include <util/delay.h>
-#endif
-
-#include <Adafruit_GFX.h>
 #include "Adafruit_SH110X.h"
 #include "splash.h"
 
-// SOME DEFINES AND STATIC VARIABLES USED INTERNALLY -----------------------
-
-#define sh110x_swap(a, b) \
-  (((a) ^= (b)), ((b) ^= (a)), ((a) ^= (b))) ///< No-temp-var swap operation
 
 // CONSTRUCTORS, DESTRUCTOR ------------------------------------------------
 
@@ -164,12 +146,6 @@ Adafruit_SH110X::Adafruit_SH110X(uint16_t w, uint16_t h, SPIClass *spi,
     @brief  Destructor for Adafruit_SH110X object.
 */
 Adafruit_SH110X::~Adafruit_SH110X(void) {
-  if(buffer) {
-    free(buffer);
-    buffer = NULL;
-  }
-  if (spi_dev) delete spi_dev;
-  if (i2c_dev) delete i2c_dev;
 }
 
 // ALLOCATE & INIT DISPLAY -------------------------------------------------
@@ -206,43 +182,14 @@ Adafruit_SH110X::~Adafruit_SH110X(void) {
 */
 bool Adafruit_SH110X::begin(uint8_t vcs, uint8_t addr, boolean reset) {
 
-  // attempt to malloc the bitmap framebuffer
-  if((!buffer) && !(buffer = (uint8_t *)malloc(WIDTH * ((HEIGHT + 7) / 8)))) {
-    return false;
-  }
+  Adafruit_MonoOLED::_init(addr, reset);
 
-  // Setup pin directions
-  if (_theWire) { // using I2C
-    i2c_dev = new Adafruit_I2CDevice(addr, _theWire);
-    // look for i2c address:
-    if (!i2c_dev || !i2c_dev->begin()) {
-      return false;
-    }
-  } else { // Using one of the SPI modes, either soft or hardware
-    if (!spi_dev || !spi_dev->begin()) {
-      return;
-    }
-    pinMode(dcPin, OUTPUT); // Set data/command pin as output
-  }
-
-  clearDisplay();
   if(HEIGHT > 32) {
     drawBitmap((WIDTH - splash1_width) / 2, (HEIGHT - splash1_height) / 2,
       splash1_data, splash1_width, splash1_height, 1);
   } else {
     drawBitmap((WIDTH - splash2_width) / 2, (HEIGHT - splash2_height) / 2,
       splash2_data, splash2_width, splash2_height, 1);
-  }
-
-  // Reset SH110X if requested and reset pin specified in constructor
-  if(reset && (rstPin >= 0)) {
-    pinMode(rstPin, OUTPUT);
-    digitalWrite(rstPin, HIGH);
-    delay(1);                   // VDD goes high at start, pause for 1 ms
-    digitalWrite(rstPin, LOW);  // Bring reset low
-    delay(10);                  // Wait 10 ms
-    digitalWrite(rstPin, HIGH); // Bring out of reset
-    delay(10);
   }
 
   // Init sequence, make sure its under 32 bytes, or split into multiples!
