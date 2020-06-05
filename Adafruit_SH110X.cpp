@@ -266,8 +266,8 @@ void Adafruit_SH110X::display(void) {
 
   uint8_t first_page = window_y1 / 8;
   uint8_t last_page = (window_y2+7) / 8;
-  uint8_t page_start = min(bytes_per_page, window_x1);
-  uint8_t page_end = max(0, window_x2);
+  uint8_t page_start = min(bytes_per_page, (uint8_t)window_x1);
+  uint8_t page_end = (uint8_t)max((int)0, (int)window_x2);
   /*
   Serial.print("Pages: ");  
   Serial.print(first_page);
@@ -299,11 +299,11 @@ void Adafruit_SH110X::display(void) {
       i2c_dev->write(cmd, 4);
 
       while (bytes_remaining) {
-	uint8_t to_write = min(bytes_remaining, maxbuff);
-	i2c_dev->write(ptr, to_write, true, &dc_byte, 1);
-	ptr += to_write;
-	bytes_remaining -= to_write;
-	yield();
+        uint8_t to_write = min(bytes_remaining, (uint8_t)maxbuff);
+        i2c_dev->write(ptr, to_write, true, &dc_byte, 1);
+        ptr += to_write;
+        bytes_remaining -= to_write;
+        yield();
       }
     }
     // Set high speed clk
