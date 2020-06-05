@@ -1,7 +1,7 @@
 /*!
  * @file Adafruit_SH110X.h
  *
- * This is part of for Adafruit's SSD1306 library for monochrome
+ * This is part of for Adafruit's SH110X library for monochrome
  * OLED displays: http://www.adafruit.com/category/63_98
  *
  * These displays use I2C or SPI to communicate. I2C requires 2 pins

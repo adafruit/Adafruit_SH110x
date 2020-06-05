@@ -1,11 +1,11 @@
 /*!
- * @file Adafruit_SSD1306.cpp
+ * @file Adafruit_SH110X.cpp
  *
- * @mainpage Arduino library for monochrome OLEDs based on SSD1306 drivers.
+ * @mainpage Arduino library for monochrome OLEDs based on SH110X drivers.
  *
  * @section intro_sec Introduction
  *
- * This is documentation for Adafruit's SSD1306 library for monochrome
+ * This is documentation for Adafruit's SH110X library for monochrome
  * OLED displays: http://www.adafruit.com/category/63_98
  *
  * These displays use I2C or SPI to communicate. I2C requires 2 pins
