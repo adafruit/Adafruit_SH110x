@@ -184,7 +184,7 @@ bool Adafruit_SH110X::begin(uint8_t addr, boolean reset) {
 
   Adafruit_MonoOLED::_init(addr, reset);
 
-  setContrast(0x80);
+  setContrast(0x2F);
 
   // the featherwing with 128x64 oled is 'rotated' so to make the splash right, rotate!
   if (WIDTH == 64 && HEIGHT == 128) {
@@ -198,26 +198,29 @@ bool Adafruit_SH110X::begin(uint8_t addr, boolean reset) {
   // Init sequence, make sure its under 32 bytes, or split into multiples!
   static const uint8_t init[] = {
     SH110X_DISPLAYOFF,                   // 0xAE
-    SH110X_SETDISPSTARTLINE, 0x0,        // 0xDC 0x00
-    SH110X_SETCONTRAST, 0x2F,            // 0x81, 0x2F
+    SH110X_SETDISPLAYCLOCKDIV, 0x51,     // 0xd5, 0x51,
     SH110X_MEMORYMODE,                   // 0x20
+    SH110X_SETCONTRAST, 0x4F,            // 0x81, 0x4F
+    SH110X_DCDC, 0x8A,            // 0xAD, 0x8A
     SH110X_SEGREMAP,                     // 0xA0
     SH110X_COMSCANINC,                   // 0xC0
-    SH110X_SETMULTIPLEX, 0x7F,           // 0xa8, 0x7f,
+    SH110X_SETDISPSTARTLINE, 0x0,        // 0xDC 0x00
     SH110X_SETDISPLAYOFFSET, 0x60,       // 0xd3, 0x60,
-    SH110X_SETDISPLAYCLOCKDIV, 0x51,     // 0xd5, 0x51,
     SH110X_SETPRECHARGE, 0x22,           // 0xd9, 0x22,
     SH110X_SETVCOMDETECT, 0x35,          // 0xdb, 0x35,
-    SH110X_SETPAGEADDR,                  // 0xb0
-    SH110X_SETCOMPINS, 0x12,             // 0xda, 0x12,
+    SH110X_SETMULTIPLEX, 0x3F,           // 0xa8, 0x3f,
+    //SH110X_SETPAGEADDR,                  // 0xb0
+    //SH110X_SETCOMPINS, 0x12,             // 0xda, 0x12,
     SH110X_DISPLAYALLON_RESUME,          // 0xa4
     SH110X_NORMALDISPLAY,                // 0xa6
-    SH110X_DISPLAYON,                    // 0xaf
   };
 
   if (! oled_commandList(init, sizeof(init))) {
     return false;
   }
+  delay(100); // 100ms delay recommended
+  oled_command(SH110X_DISPLAYON);                   // 0xaf
+
 
   return true; // Success
 }
@@ -233,7 +236,6 @@ bool Adafruit_SH110X::begin(uint8_t addr, boolean reset) {
             of graphics commands, as best needed by one's own application.
 */
 void Adafruit_SH110X::display(void) {
-#if defined(ESP8266)
   // ESP8266 needs a periodic yield() call to avoid watchdog reset.
   // With the limited size of SH110X displays, and the fast bitrate
   // being used (1 MHz or more), I think one yield() immediately before
@@ -241,7 +243,7 @@ void Adafruit_SH110X::display(void) {
   // not, if this becomes a problem, yields() might be added in the
   // 32-byte transfer condition below.
   yield();
-#endif
+
   uint16_t count = WIDTH * ((HEIGHT + 7) / 8);
   uint8_t *ptr   = buffer;
   uint8_t dc_byte = 0x40;
@@ -250,6 +252,7 @@ void Adafruit_SH110X::display(void) {
   uint8_t bytes_per_page = WIDTH;
   uint16_t maxbuff = i2c_dev->maxBufferSize() - 1;
 
+  /*
   Serial.print("Window: (");
   Serial.print(window_x1);
   Serial.print(", ");
@@ -259,21 +262,24 @@ void Adafruit_SH110X::display(void) {
   Serial.print(", ");
   Serial.print(window_y2);
   Serial.println(")");
+  */
 
   uint8_t first_page = window_y1 / 8;
   uint8_t last_page = (window_y2+7) / 8;
+  uint8_t page_start = min(bytes_per_page, window_x1);
+  uint8_t page_end = max(0, window_x2);
+  /*
   Serial.print("Pages: ");  
   Serial.print(first_page);
   Serial.print(" -> ");
   Serial.println(last_page);
   pages = min(pages, last_page);
 
-  uint8_t page_start = min(bytes_per_page, window_x1);
-  uint8_t page_end = max(0, window_x2);
   Serial.print("Page addr: ");  
   Serial.print(page_start);
   Serial.print(" -> ");
   Serial.println(page_end);
+  */
 
   if (i2c_dev) { // I2C
     // Set high speed clk
@@ -297,9 +303,7 @@ void Adafruit_SH110X::display(void) {
 	i2c_dev->write(ptr, to_write, true, &dc_byte, 1);
 	ptr += to_write;
 	bytes_remaining -= to_write;
-#if defined(ESP8266)
 	yield();
-#endif
       }
     }
     // Set high speed clk

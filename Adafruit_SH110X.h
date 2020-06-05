@@ -42,6 +42,7 @@
 #define SH110X_NORMALDISPLAY       0xA6 ///< See datasheet
 #define SH110X_INVERTDISPLAY       0xA7 ///< See datasheet
 #define SH110X_SETMULTIPLEX        0xA8 ///< See datasheet
+#define SH110X_DCDC          0xAD ///< See datasheet
 #define SH110X_DISPLAYOFF          0xAE ///< See datasheet
 #define SH110X_DISPLAYON           0xAF ///< See datasheet
 #define SH110X_SETPAGEADDR         0xB0 ///< Specify page address to load display RAM data to page address register
