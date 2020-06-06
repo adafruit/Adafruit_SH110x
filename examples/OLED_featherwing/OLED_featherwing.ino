@@ -22,7 +22,7 @@ Adafruit_SH110X display = Adafruit_SH110X(64, 128, &Wire);
   #define BUTTON_A  4
   #define BUTTON_B  3
   #define BUTTON_C  8
-#elif defined(ARDUINO_FEATHER52832)
+#elif defined(ARDUINO_NRF52832_FEATHER)
   #define BUTTON_A 31
   #define BUTTON_B 30
   #define BUTTON_C 27
