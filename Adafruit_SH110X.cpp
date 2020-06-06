@@ -70,7 +70,6 @@
             because other devices on the I2C bus might not be compatible
             with the faster rate. (Ignored if using pre-1.5.7 Arduino
             software, which operates I2C at a fixed 100 KHz.)
-    @return Adafruit_SH110X object.
     @note   Call the object's begin() function before use -- buffer
             allocation is performed there!
 */
@@ -102,7 +101,6 @@ Adafruit_SH110X::Adafruit_SH110X(uint16_t w, uint16_t h, TwoWire *twi,
     @param  cs_pin
             Chip-select pin (using Arduino pin numbering) for sharing the
             bus with other devices. Active low.
-    @return Adafruit_SH110X object.
     @note   Call the object's begin() function before use -- buffer
             allocation is performed there!
 */
@@ -133,7 +131,6 @@ Adafruit_SH110X::Adafruit_SH110X(uint16_t w, uint16_t h, int8_t mosi_pin,
     @param  bitrate
             SPI clock rate for transfers to this display. Default if
             unspecified is 8000000UL (8 MHz).
-    @return Adafruit_SH110X object.
     @note   Call the object's begin() function before use -- buffer
             allocation is performed there!
 */
@@ -165,15 +162,6 @@ Adafruit_SH110X::~Adafruit_SH110X(void) {}
             on the first display being initialized, false on all others,
             else the already-initialized displays would be reset. Default if
             unspecified is true.
-    @param  periphBegin
-            If true, and if a hardware peripheral is being used (I2C or SPI,
-            but not software SPI), call that peripheral's begin() function,
-            else (false) it has already been done in one's sketch code.
-            Cases where false might be used include multiple displays or
-            other devices sharing a common bus, or situations on some
-            platforms where a nonstandard begin() function is available
-            (e.g. a TwoWire interface on non-default pins, as can be done
-            on the ESP8266 and perhaps others).
     @return true on successful allocation/init, false otherwise.
             Well-behaved code should check the return value before
             proceeding.
@@ -227,7 +215,6 @@ bool Adafruit_SH110X::begin(uint8_t addr, boolean reset) {
 
 /*!
     @brief  Push data currently in RAM to SH110X display.
-    @return None (void).
     @note   Drawing operations are not visible until this function is
             called. Call after each graphics command, or after a whole set
             of graphics commands, as best needed by one's own application.
