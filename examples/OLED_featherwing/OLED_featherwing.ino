@@ -36,7 +36,6 @@ void setup() {
   Serial.begin(115200);
 
   Serial.println("128x64 OLED FeatherWing test");
-  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
   display.begin(0x3C, true); // Address 0x3C default
 
   Serial.println("OLED begun");

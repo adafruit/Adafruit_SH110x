@@ -24,7 +24,7 @@
 #ifndef _Adafruit_SH110X_H_
 #define _Adafruit_SH110X_H_
 
-#include <Adafruit_MonoOLED.h>
+#include <Adafruit_GrayOLED.h>
 
 /// fit into the SH110X_ naming scheme
 #define SH110X_BLACK 0   ///< Draw 'off' pixels
@@ -67,7 +67,7 @@
     @brief  Class that stores state and functions for interacting with
             SH110X OLED displays.
 */
-class Adafruit_SH110X : public Adafruit_MonoOLED {
+class Adafruit_SH110X : public Adafruit_GrayOLED {
 public:
   // NEW CONSTRUCTORS -- recommended for new projects
   Adafruit_SH110X(uint16_t w, uint16_t h, TwoWire *twi = &Wire,
