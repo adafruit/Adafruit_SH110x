@@ -14,6 +14,6 @@ products from Adafruit!
 Written by Limor Fried/Ladyada for Adafruit Industries.
 BSD license, check license.txt for more information. All text above must be included in any redistribution
 
-Preferred installation method is to use the Arduino IDE Library Manager. To download the source from Github instead, click "Clone or download" above, then "Download ZIP." After uncompressing, rename the resulting folder Adafruit_SSD1306. Check that the Adafruit_SSD1306 folder contains Adafruit_SSD1306.cpp and Adafruit_SSD1306.h.
+Preferred installation method is to use the Arduino IDE Library Manager. To download the source from Github instead, click "Clone or download" above, then "Download ZIP." After uncompressing, rename the resulting folder Adafruit_SH110X. Check that the Adafruit_SH110X folder contains Adafruit_SH110X.cpp and Adafruit_SH110X.h.
 
 You will also have to install the **Adafruit GFX library** which provides graphics primitves such as lines, circles, text, etc. This also can be found in the Arduino Library Manager, or you can get the source from https://github.com/adafruit/Adafruit-GFX-Library
