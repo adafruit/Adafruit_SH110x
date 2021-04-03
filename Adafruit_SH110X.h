@@ -82,6 +82,7 @@ public:
 
   bool begin(uint8_t i2caddr = 0x3C, boolean reset = true);
   void display(void);
+  virtual size_t write(uint8_t);
 
 private:
 };

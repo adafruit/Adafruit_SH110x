@@ -303,3 +303,14 @@ void Adafruit_SH110X::display(void) {
   window_x2 = -1;
   window_y2 = -1;
 }
+
+// OVERRIDES ---------------------------------------------------------------
+
+/*!
+    @brief  Override for Print::write
+    @note   Override for Print::write so that Adafruit_SH110X is not an
+            abstract class.
+*/
+size_t Adafruit_SH110X::write(uint8_t c) { 
+  return Adafruit_GFX::write(c);
+}
