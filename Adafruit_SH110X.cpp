@@ -310,5 +310,7 @@ void Adafruit_SH110X::display(void) {
     @brief  Override for Print::write.
     @note   Override for Print::write so that Adafruit_SH110X is not an
             abstract class.
+    @return The output of the overriden Print::write(uint8_t) in
+            Adafruit_GFX (Adafruit_GFX::write(uint8_t)).
 */
 size_t Adafruit_SH110X::write(uint8_t c) { return Adafruit_GFX::write(c); }
