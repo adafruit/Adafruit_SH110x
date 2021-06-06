@@ -1,11 +1,11 @@
 /*!
- * @file Adafruit_SH110X.cpp
+ * @file Adafruit_SH1106G.cpp
  *
- * @mainpage Arduino library for monochrome OLEDs based on SH110X drivers.
+ * @mainpage Arduino library for monochrome OLEDs based on SH1106G drivers.
  *
  * @section intro_sec Introduction
  *
- * This is documentation for Adafruit's SH110X library for monochrome
+ * This is documentation for Adafruit's SH1106G library for monochrome
  * OLED displays: http://www.adafruit.com/category/63_98
  *
  * These displays use I2C or SPI to communicate. I2C requires 2 pins
@@ -42,7 +42,7 @@
 // CONSTRUCTORS, DESTRUCTOR ------------------------------------------------
 
 /*!
-    @brief  Constructor for I2C-interfaced SH110X displays.
+    @brief  Constructor for I2C-interfaced SH1106G displays.
     @param  w
             Display width in pixels
     @param  h
@@ -73,13 +73,13 @@
     @note   Call the object's begin() function before use -- buffer
             allocation is performed there!
 */
-Adafruit_SH110X::Adafruit_SH110X(uint16_t w, uint16_t h, TwoWire *twi,
+Adafruit_SH1106G::Adafruit_SH1106G(uint16_t w, uint16_t h, TwoWire *twi,
                                  int8_t rst_pin, uint32_t clkDuring,
                                  uint32_t clkAfter)
-    : Adafruit_GrayOLED(1, w, h, twi, rst_pin, clkDuring, clkAfter) {}
+    : Adafruit_SH110X(w, h, twi, rst_pin, clkDuring, clkAfter) {}
 
 /*!
-    @brief  Constructor for SPI SH110X displays, using software (bitbang)
+    @brief  Constructor for SPI SH1106G displays, using software (bitbang)
             SPI.
     @param  w
             Display width in pixels
@@ -104,13 +104,13 @@ Adafruit_SH110X::Adafruit_SH110X(uint16_t w, uint16_t h, TwoWire *twi,
     @note   Call the object's begin() function before use -- buffer
             allocation is performed there!
 */
-Adafruit_SH110X::Adafruit_SH110X(uint16_t w, uint16_t h, int8_t mosi_pin,
+Adafruit_SH1106G::Adafruit_SH1106G(uint16_t w, uint16_t h, int8_t mosi_pin,
                                  int8_t sclk_pin, int8_t dc_pin, int8_t rst_pin,
                                  int8_t cs_pin)
-    : Adafruit_GrayOLED(1, w, h, mosi_pin, sclk_pin, dc_pin, rst_pin, cs_pin) {}
+    : Adafruit_SH110X(w, h, mosi_pin, sclk_pin, dc_pin, rst_pin, cs_pin) {}
 
 /*!
-    @brief  Constructor for SPI SH110X displays, using native hardware SPI.
+    @brief  Constructor for SPI SH1106G displays, using native hardware SPI.
     @param  w
             Display width in pixels
     @param  h
@@ -134,116 +134,76 @@ Adafruit_SH110X::Adafruit_SH110X(uint16_t w, uint16_t h, int8_t mosi_pin,
     @note   Call the object's begin() function before use -- buffer
             allocation is performed there!
 */
-Adafruit_SH110X::Adafruit_SH110X(uint16_t w, uint16_t h, SPIClass *spi,
+Adafruit_SH1106G::Adafruit_SH1106G(uint16_t w, uint16_t h, SPIClass *spi,
                                  int8_t dc_pin, int8_t rst_pin, int8_t cs_pin,
                                  uint32_t bitrate)
-    : Adafruit_GrayOLED(1, w, h, spi, dc_pin, rst_pin, cs_pin, bitrate) {}
+    : Adafruit_SH110X(w, h, spi, dc_pin, rst_pin, cs_pin, bitrate) {}
 
 /*!
-    @brief  Destructor for Adafruit_SH110X object.
+    @brief  Destructor for Adafruit_SH1106G object.
 */
-Adafruit_SH110X::~Adafruit_SH110X(void) {}
+Adafruit_SH1106G::~Adafruit_SH1106G(void) {}
 
-// REFRESH DISPLAY ---------------------------------------------------------
+
+
+
 
 /*!
-    @brief  Push data currently in RAM to SH110X display.
-    @note   Drawing operations are not visible until this function is
-            called. Call after each graphics command, or after a whole set
-            of graphics commands, as best needed by one's own application.
+    @brief  Allocate RAM for image buffer, initialize peripherals and pins.
+    @param  addr
+            I2C address of corresponding SH110X display (or pass 0 to use
+            default of 0x3C for 128x32 display, 0x3D for all others).
+            SPI displays (hardware or software) do not use addresses, but
+            this argument is still required (pass 0 or any value really,
+            it will simply be ignored). Default if unspecified is 0.
+    @param  reset
+            If true, and if the reset pin passed to the constructor is
+            valid, a hard reset will be performed before initializing the
+            display. If using multiple SH110X displays on the same bus, and
+            if they all share the same reset pin, you should only pass true
+            on the first display being initialized, false on all others,
+            else the already-initialized displays would be reset. Default if
+            unspecified is true.
+    @return true on successful allocation/init, false otherwise.
+            Well-behaved code should check the return value before
+            proceeding.
+    @note   MUST call this function before any drawing or updates!
 */
-void Adafruit_SH110X::display(void) {
-  // ESP8266 needs a periodic yield() call to avoid watchdog reset.
-  // With the limited size of SH110X displays, and the fast bitrate
-  // being used (1 MHz or more), I think one yield() immediately before
-  // a screen write and one immediately after should cover it.  But if
-  // not, if this becomes a problem, yields() might be added in the
-  // 32-byte transfer condition below.
-  yield();
+bool Adafruit_SH1106G::begin(uint8_t addr, bool reset) {
 
-  uint16_t count = WIDTH * ((HEIGHT + 7) / 8);
-  uint8_t *ptr = buffer;
-  uint8_t dc_byte = 0x40;
-  uint8_t pages = ((HEIGHT + 7) / 8);
+  Adafruit_GrayOLED::_init(addr, reset);
 
-  uint8_t bytes_per_page = WIDTH;
-  uint16_t maxbuff = i2c_dev->maxBufferSize() - 1;
+  _page_start_offset = 2; // the SH1106 display we have found requires a small offset into memory
 
-  /*
-  Serial.print("Window: (");
-  Serial.print(window_x1);
-  Serial.print(", ");
-  Serial.print(window_y1);
-  Serial.print(" -> (");
-  Serial.print(window_x2);
-  Serial.print(", ");
-  Serial.print(window_y2);
-  Serial.println(")");
-  */
+  drawBitmap((WIDTH - splash2_width) / 2, (HEIGHT - splash2_height) / 2,
+             splash2_data, splash2_width, splash2_height, 1);
 
-  uint8_t first_page = window_y1 / 8;
-  uint8_t last_page = (window_y2 + 7) / 8;
-  uint8_t page_start = min(bytes_per_page, (uint8_t)window_x1);
-  uint8_t page_end = (uint8_t)max((int)0, (int)window_x2);
-  /*
-  Serial.print("Pages: ");
-  Serial.print(first_page);
-  Serial.print(" -> ");
-  Serial.println(last_page);
-  pages = min(pages, last_page);
+  // Init sequence, make sure its under 32 bytes, or split into multiples!
+  static const uint8_t init[] = {
+      SH110X_DISPLAYOFF,               // 0xAE
+      SH110X_SETDISPLAYCLOCKDIV, 0x80, // 0xd5, 0x80,
+      SH110X_SETMULTIPLEX, 0x3F,       // 0xa8, 0x3f,
+      SH110X_SETDISPLAYOFFSET, 0x00,   // 0xd3, 0x00,
+      SH110X_SETSTARTLINE,             // 0x40
+      SH110X_DCDC, 0x8B,               // DC/DC on
+      SH110X_SEGREMAP + 1,             // 0xA1
+      SH110X_COMSCANDEC,               // 0xC8
+      SH110X_SETCOMPINS, 0x12,         // 0xda, 0x12,
+      SH110X_SETCONTRAST, 0xFF,        // 0x81, 0xFF
+      SH110X_SETPRECHARGE, 0x1F,       // 0xd9, 0xF1,
+      SH110X_SETVCOMDETECT, 0x40,      // 0xdb, 0x40,
+      0x33,                            // Set VPP to 9V
+      SH110X_NORMALDISPLAY,
+      SH110X_MEMORYMODE, 0x10,         // 0x20, 0x00
+      SH110X_DISPLAYALLON_RESUME,
+  };
 
-  Serial.print("Page addr: ");
-  Serial.print(page_start);
-  Serial.print(" -> ");
-  Serial.println(page_end);
-  */
-
-  for (uint8_t p = first_page; p < pages; p++) {
-    uint8_t bytes_remaining = bytes_per_page;
-    ptr = buffer + (uint16_t)p * (uint16_t)bytes_per_page;
-    // fast forward to dirty rectangle beginning
-    ptr += page_start;
-    bytes_remaining -= page_start;
-    // cut off end of dirty rectangle
-    bytes_remaining -= (WIDTH - 1) - page_end;
-    
-    if (i2c_dev) { // I2C
-      uint8_t cmd[] = {0x00, 
-                       SH110X_SETPAGEADDR + p,
-                       0x10 + ((page_start + _page_start_offset) >> 4),
-                       (page_start + _page_start_offset) & 0xF};
-
-      // Set high speed clk
-      i2c_dev->setSpeed(i2c_preclk);
-
-      i2c_dev->write(cmd, 4);
-
-      while (bytes_remaining) {
-        uint8_t to_write = min(bytes_remaining, (uint8_t)maxbuff);
-        i2c_dev->write(ptr, to_write, true, &dc_byte, 1);
-        ptr += to_write;
-        bytes_remaining -= to_write;
-        yield();
-      }
-    
-      // Set low speed clk
-      i2c_dev->setSpeed(i2c_postclk);
-    
-    } 
-    else { // SPI
-      uint8_t cmd[] = {SH110X_SETPAGEADDR + p, 
-                       0x10 + ((page_start + _page_start_offset) >> 4),
-                       (page_start + _page_start_offset) & 0xF};
-
-      digitalWrite(dcPin, LOW);
-      spi_dev->write(cmd, 3);
-      digitalWrite(dcPin, HIGH);
-      spi_dev->write(ptr, bytes_remaining);
-    }
+  if (!oled_commandList(init, sizeof(init))) {
+    return false;
   }
-  // reset dirty window
-  window_x1 = 1024;
-  window_y1 = 1024;
-  window_x2 = -1;
-  window_y2 = -1;
+ 
+  delay(100);                     // 100ms delay recommended
+  oled_command(SH110X_DISPLAYON); // 0xaf
+
+  return true; // Success
 }
