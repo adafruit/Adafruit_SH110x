@@ -83,7 +83,7 @@ public:
   void display(void);
 
  protected:
-  int8_t _page_start_offset = 0; // some displays are 'inset' in memory, so we have to skip some memory to display
+  uint8_t _page_start_offset = 0; // some displays are 'inset' in memory, so we have to skip some memory to display
  private:
 };
 

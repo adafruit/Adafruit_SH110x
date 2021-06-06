@@ -209,9 +209,9 @@ void Adafruit_SH110X::display(void) {
     
     if (i2c_dev) { // I2C
       uint8_t cmd[] = {0x00, 
-                       SH110X_SETPAGEADDR + p,
-                       0x10 + ((page_start + _page_start_offset) >> 4),
-                       (page_start + _page_start_offset) & 0xF};
+                       (uint8_t)(SH110X_SETPAGEADDR + p),
+                       (uint8_t)(0x10 + ((page_start + _page_start_offset) >> 4)),
+                       (uint8_t)((page_start + _page_start_offset) & 0xF)};
 
       // Set high speed clk
       i2c_dev->setSpeed(i2c_preclk);
@@ -231,9 +231,9 @@ void Adafruit_SH110X::display(void) {
     
     } 
     else { // SPI
-      uint8_t cmd[] = {SH110X_SETPAGEADDR + p, 
-                       0x10 + ((page_start + _page_start_offset) >> 4),
-                       (page_start + _page_start_offset) & 0xF};
+      uint8_t cmd[] = {(uint8_t)(SH110X_SETPAGEADDR + p), 
+                       (uint8_t)(0x10 + ((page_start + _page_start_offset) >> 4)),
+                       (uint8_t)((page_start + _page_start_offset) & 0xF)};
 
       digitalWrite(dcPin, LOW);
       spi_dev->write(cmd, 3);
