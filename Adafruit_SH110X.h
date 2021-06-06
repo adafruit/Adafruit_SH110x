@@ -65,7 +65,7 @@
 
 /*!
     @brief  Class that stores state and functions for interacting with
-            SH110X OLED displays.
+            SH110X OLED displays. Not instantiatable - use a subclass!
 */
 class Adafruit_SH110X : public Adafruit_GrayOLED {
 public:
@@ -78,12 +78,53 @@ public:
   Adafruit_SH110X(uint16_t w, uint16_t h, SPIClass *spi, int8_t dc_pin,
                   int8_t rst_pin, int8_t cs_pin, uint32_t bitrate = 8000000UL);
 
-  ~Adafruit_SH110X(void);
+  virtual ~Adafruit_SH110X(void) = 0;
 
-  bool begin(uint8_t i2caddr = 0x3C, boolean reset = true);
   void display(void);
+
+protected:
+  /*! some displays are 'inset' in memory, so we have to skip some memory to
+   * display */
+  uint8_t _page_start_offset = 0;
 
 private:
 };
 
+/*!
+    @brief  Class that stores state and functions for interacting with
+            SH1106G OLED displays.
+*/
+class Adafruit_SH1106G : public Adafruit_SH110X {
+public:
+  Adafruit_SH1106G(uint16_t w, uint16_t h, TwoWire *twi = &Wire,
+                   int8_t rst_pin = -1, uint32_t preclk = 400000,
+                   uint32_t postclk = 100000);
+  Adafruit_SH1106G(uint16_t w, uint16_t h, int8_t mosi_pin, int8_t sclk_pin,
+                   int8_t dc_pin, int8_t rst_pin, int8_t cs_pin);
+  Adafruit_SH1106G(uint16_t w, uint16_t h, SPIClass *spi, int8_t dc_pin,
+                   int8_t rst_pin, int8_t cs_pin, uint32_t bitrate = 8000000UL);
+
+  ~Adafruit_SH1106G(void);
+
+  bool begin(uint8_t i2caddr = 0x3C, bool reset = true);
+};
+
+/*!
+    @brief  Class that stores state and functions for interacting with
+            SH1107 OLED displays.
+*/
+class Adafruit_SH1107 : public Adafruit_SH110X {
+public:
+  Adafruit_SH1107(uint16_t w, uint16_t h, TwoWire *twi = &Wire,
+                  int8_t rst_pin = -1, uint32_t preclk = 400000,
+                  uint32_t postclk = 100000);
+  Adafruit_SH1107(uint16_t w, uint16_t h, int8_t mosi_pin, int8_t sclk_pin,
+                  int8_t dc_pin, int8_t rst_pin, int8_t cs_pin);
+  Adafruit_SH1107(uint16_t w, uint16_t h, SPIClass *spi, int8_t dc_pin,
+                  int8_t rst_pin, int8_t cs_pin, uint32_t bitrate = 8000000UL);
+
+  ~Adafruit_SH1107(void);
+
+  bool begin(uint8_t i2caddr = 0x3C, bool reset = true);
+};
 #endif // _Adafruit_SH110X_H_

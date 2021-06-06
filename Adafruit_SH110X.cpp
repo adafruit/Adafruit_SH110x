@@ -144,73 +144,6 @@ Adafruit_SH110X::Adafruit_SH110X(uint16_t w, uint16_t h, SPIClass *spi,
 */
 Adafruit_SH110X::~Adafruit_SH110X(void) {}
 
-// ALLOCATE & INIT DISPLAY -------------------------------------------------
-
-/*!
-    @brief  Allocate RAM for image buffer, initialize peripherals and pins.
-    @param  addr
-            I2C address of corresponding SH110X display (or pass 0 to use
-            default of 0x3C for 128x32 display, 0x3D for all others).
-            SPI displays (hardware or software) do not use addresses, but
-            this argument is still required (pass 0 or any value really,
-            it will simply be ignored). Default if unspecified is 0.
-    @param  reset
-            If true, and if the reset pin passed to the constructor is
-            valid, a hard reset will be performed before initializing the
-            display. If using multiple SH110X displays on the same bus, and
-            if they all share the same reset pin, you should only pass true
-            on the first display being initialized, false on all others,
-            else the already-initialized displays would be reset. Default if
-            unspecified is true.
-    @return true on successful allocation/init, false otherwise.
-            Well-behaved code should check the return value before
-            proceeding.
-    @note   MUST call this function before any drawing or updates!
-*/
-bool Adafruit_SH110X::begin(uint8_t addr, boolean reset) {
-
-  Adafruit_GrayOLED::_init(addr, reset);
-
-  setContrast(0x2F);
-
-  // the featherwing with 128x64 oled is 'rotated' so to make the splash right,
-  // rotate!
-  if (WIDTH == 64 && HEIGHT == 128) {
-    setRotation(1);
-    drawBitmap((HEIGHT - splash2_width) / 2, (WIDTH - splash2_height) / 2,
-               splash2_data, splash2_width, splash2_height, 1);
-    setRotation(0);
-  }
-
-  // Init sequence, make sure its under 32 bytes, or split into multiples!
-  static const uint8_t init[] = {
-      SH110X_DISPLAYOFF,               // 0xAE
-      SH110X_SETDISPLAYCLOCKDIV, 0x51, // 0xd5, 0x51,
-      SH110X_MEMORYMODE,               // 0x20
-      SH110X_SETCONTRAST, 0x4F,        // 0x81, 0x4F
-      SH110X_DCDC, 0x8A,               // 0xAD, 0x8A
-      SH110X_SEGREMAP,                 // 0xA0
-      SH110X_COMSCANINC,               // 0xC0
-      SH110X_SETDISPSTARTLINE, 0x0,    // 0xDC 0x00
-      SH110X_SETDISPLAYOFFSET, 0x60,   // 0xd3, 0x60,
-      SH110X_SETPRECHARGE, 0x22,       // 0xd9, 0x22,
-      SH110X_SETVCOMDETECT, 0x35,      // 0xdb, 0x35,
-      SH110X_SETMULTIPLEX, 0x3F,       // 0xa8, 0x3f,
-      // SH110X_SETPAGEADDR,                  // 0xb0
-      // SH110X_SETCOMPINS, 0x12,             // 0xda, 0x12,
-      SH110X_DISPLAYALLON_RESUME, // 0xa4
-      SH110X_NORMALDISPLAY,       // 0xa6
-  };
-
-  if (!oled_commandList(init, sizeof(init))) {
-    return false;
-  }
-  delay(100);                     // 100ms delay recommended
-  oled_command(SH110X_DISPLAYON); // 0xaf
-
-  return true; // Success
-}
-
 // REFRESH DISPLAY ---------------------------------------------------------
 
 /*!
@@ -265,21 +198,24 @@ void Adafruit_SH110X::display(void) {
   Serial.println(page_end);
   */
 
-  if (i2c_dev) { // I2C
-    // Set high speed clk
-    i2c_dev->setSpeed(i2c_preclk);
+  for (uint8_t p = first_page; p < pages; p++) {
+    uint8_t bytes_remaining = bytes_per_page;
+    ptr = buffer + (uint16_t)p * (uint16_t)bytes_per_page;
+    // fast forward to dirty rectangle beginning
+    ptr += page_start;
+    bytes_remaining -= page_start;
+    // cut off end of dirty rectangle
+    bytes_remaining -= (WIDTH - 1) - page_end;
 
-    for (uint8_t p = first_page; p < pages; p++) {
-      uint8_t bytes_remaining = bytes_per_page;
-      ptr = buffer + (uint16_t)p * (uint16_t)bytes_per_page;
-      // fast forward to dirty rectangle beginning
-      ptr += page_start;
-      bytes_remaining -= page_start;
-      // cut off end of dirty rectangle
-      bytes_remaining -= (WIDTH - 1) - page_end;
+    if (i2c_dev) { // I2C
+      uint8_t cmd[] = {
+          0x00, (uint8_t)(SH110X_SETPAGEADDR + p),
+          (uint8_t)(0x10 + ((page_start + _page_start_offset) >> 4)),
+          (uint8_t)((page_start + _page_start_offset) & 0xF)};
 
-      uint8_t cmd[] = {0x00, SH110X_SETPAGEADDR + p, 0x10 + (page_start >> 4),
-                       page_start & 0xF};
+      // Set high speed clk
+      i2c_dev->setSpeed(i2c_preclk);
+
       i2c_dev->write(cmd, 4);
 
       while (bytes_remaining) {
@@ -289,13 +225,21 @@ void Adafruit_SH110X::display(void) {
         bytes_remaining -= to_write;
         yield();
       }
-    }
-    // Set high speed clk
-    i2c_dev->setSpeed(i2c_postclk);
 
-  } else { // SPI
-    // SH110X_MODE_DATA
-    // while(count--) SPIwrite(*ptr++);
+      // Set low speed clk
+      i2c_dev->setSpeed(i2c_postclk);
+
+    } else { // SPI
+      uint8_t cmd[] = {
+          (uint8_t)(SH110X_SETPAGEADDR + p),
+          (uint8_t)(0x10 + ((page_start + _page_start_offset) >> 4)),
+          (uint8_t)((page_start + _page_start_offset) & 0xF)};
+
+      digitalWrite(dcPin, LOW);
+      spi_dev->write(cmd, 3);
+      digitalWrite(dcPin, HIGH);
+      spi_dev->write(ptr, bytes_remaining);
+    }
   }
   // reset dirty window
   window_x1 = 1024;
