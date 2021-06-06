@@ -144,7 +144,6 @@ Adafruit_SH1107::Adafruit_SH1107(uint16_t w, uint16_t h, SPIClass *spi,
 */
 Adafruit_SH1107::~Adafruit_SH1107(void) {}
 
-
 /*!
     @brief  Allocate RAM for image buffer, initialize peripherals and pins.
     @param  addr
@@ -182,6 +181,7 @@ bool Adafruit_SH1107::begin(uint8_t addr, bool reset) {
   }
 
   // Init sequence, make sure its under 32 bytes, or split into multiples!
+  // clang-format off
   static const uint8_t init[] = {
       SH110X_DISPLAYOFF,               // 0xAE
       SH110X_SETDISPLAYCLOCKDIV, 0x51, // 0xd5, 0x51,
@@ -200,11 +200,12 @@ bool Adafruit_SH1107::begin(uint8_t addr, bool reset) {
       SH110X_DISPLAYALLON_RESUME, // 0xa4
       SH110X_NORMALDISPLAY,       // 0xa6
   };
+  // clang-format on
 
   if (!oled_commandList(init, sizeof(init))) {
     return false;
   }
- 
+
   delay(100);                     // 100ms delay recommended
   oled_command(SH110X_DISPLAYON); // 0xaf
 

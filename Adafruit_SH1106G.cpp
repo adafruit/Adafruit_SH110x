@@ -74,8 +74,8 @@
             allocation is performed there!
 */
 Adafruit_SH1106G::Adafruit_SH1106G(uint16_t w, uint16_t h, TwoWire *twi,
-                                 int8_t rst_pin, uint32_t clkDuring,
-                                 uint32_t clkAfter)
+                                   int8_t rst_pin, uint32_t clkDuring,
+                                   uint32_t clkAfter)
     : Adafruit_SH110X(w, h, twi, rst_pin, clkDuring, clkAfter) {}
 
 /*!
@@ -105,8 +105,8 @@ Adafruit_SH1106G::Adafruit_SH1106G(uint16_t w, uint16_t h, TwoWire *twi,
             allocation is performed there!
 */
 Adafruit_SH1106G::Adafruit_SH1106G(uint16_t w, uint16_t h, int8_t mosi_pin,
-                                 int8_t sclk_pin, int8_t dc_pin, int8_t rst_pin,
-                                 int8_t cs_pin)
+                                   int8_t sclk_pin, int8_t dc_pin,
+                                   int8_t rst_pin, int8_t cs_pin)
     : Adafruit_SH110X(w, h, mosi_pin, sclk_pin, dc_pin, rst_pin, cs_pin) {}
 
 /*!
@@ -135,18 +135,14 @@ Adafruit_SH1106G::Adafruit_SH1106G(uint16_t w, uint16_t h, int8_t mosi_pin,
             allocation is performed there!
 */
 Adafruit_SH1106G::Adafruit_SH1106G(uint16_t w, uint16_t h, SPIClass *spi,
-                                 int8_t dc_pin, int8_t rst_pin, int8_t cs_pin,
-                                 uint32_t bitrate)
+                                   int8_t dc_pin, int8_t rst_pin, int8_t cs_pin,
+                                   uint32_t bitrate)
     : Adafruit_SH110X(w, h, spi, dc_pin, rst_pin, cs_pin, bitrate) {}
 
 /*!
     @brief  Destructor for Adafruit_SH1106G object.
 */
 Adafruit_SH1106G::~Adafruit_SH1106G(void) {}
-
-
-
-
 
 /*!
     @brief  Allocate RAM for image buffer, initialize peripherals and pins.
@@ -173,12 +169,14 @@ bool Adafruit_SH1106G::begin(uint8_t addr, bool reset) {
 
   Adafruit_GrayOLED::_init(addr, reset);
 
-  _page_start_offset = 2; // the SH1106 display we have found requires a small offset into memory
+  _page_start_offset =
+      2; // the SH1106 display we have found requires a small offset into memory
 
   drawBitmap((WIDTH - splash2_width) / 2, (HEIGHT - splash2_height) / 2,
              splash2_data, splash2_width, splash2_height, 1);
 
   // Init sequence, make sure its under 32 bytes, or split into multiples!
+  // clang-format off
   static const uint8_t init[] = {
       SH110X_DISPLAYOFF,               // 0xAE
       SH110X_SETDISPLAYCLOCKDIV, 0x80, // 0xD5, 0x80,
@@ -197,11 +195,12 @@ bool Adafruit_SH1106G::begin(uint8_t addr, bool reset) {
       SH110X_MEMORYMODE, 0x10,         // 0x20, 0x00
       SH110X_DISPLAYALLON_RESUME,
   };
+  // clang-format on
 
   if (!oled_commandList(init, sizeof(init))) {
     return false;
   }
- 
+
   delay(100);                     // 100ms delay recommended
   oled_command(SH110X_DISPLAYON); // 0xaf
 

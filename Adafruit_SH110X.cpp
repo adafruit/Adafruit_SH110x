@@ -206,12 +206,12 @@ void Adafruit_SH110X::display(void) {
     bytes_remaining -= page_start;
     // cut off end of dirty rectangle
     bytes_remaining -= (WIDTH - 1) - page_end;
-    
+
     if (i2c_dev) { // I2C
-      uint8_t cmd[] = {0x00, 
-                       (uint8_t)(SH110X_SETPAGEADDR + p),
-                       (uint8_t)(0x10 + ((page_start + _page_start_offset) >> 4)),
-                       (uint8_t)((page_start + _page_start_offset) & 0xF)};
+      uint8_t cmd[] = {
+          0x00, (uint8_t)(SH110X_SETPAGEADDR + p),
+          (uint8_t)(0x10 + ((page_start + _page_start_offset) >> 4)),
+          (uint8_t)((page_start + _page_start_offset) & 0xF)};
 
       // Set high speed clk
       i2c_dev->setSpeed(i2c_preclk);
@@ -225,15 +225,15 @@ void Adafruit_SH110X::display(void) {
         bytes_remaining -= to_write;
         yield();
       }
-    
+
       // Set low speed clk
       i2c_dev->setSpeed(i2c_postclk);
-    
-    } 
-    else { // SPI
-      uint8_t cmd[] = {(uint8_t)(SH110X_SETPAGEADDR + p), 
-                       (uint8_t)(0x10 + ((page_start + _page_start_offset) >> 4)),
-                       (uint8_t)((page_start + _page_start_offset) & 0xF)};
+
+    } else { // SPI
+      uint8_t cmd[] = {
+          (uint8_t)(SH110X_SETPAGEADDR + p),
+          (uint8_t)(0x10 + ((page_start + _page_start_offset) >> 4)),
+          (uint8_t)((page_start + _page_start_offset) & 0xF)};
 
       digitalWrite(dcPin, LOW);
       spi_dev->write(cmd, 3);

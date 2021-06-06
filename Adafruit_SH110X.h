@@ -82,9 +82,10 @@ public:
 
   void display(void);
 
- protected:
-  uint8_t _page_start_offset = 0; // some displays are 'inset' in memory, so we have to skip some memory to display
- private:
+protected:
+  uint8_t _page_start_offset = 0; // some displays are 'inset' in memory, so we
+                                  // have to skip some memory to display
+private:
 };
 
 /*!
@@ -94,12 +95,12 @@ public:
 class Adafruit_SH1106G : public Adafruit_SH110X {
 public:
   Adafruit_SH1106G(uint16_t w, uint16_t h, TwoWire *twi = &Wire,
-                  int8_t rst_pin = -1, uint32_t preclk = 400000,
-                  uint32_t postclk = 100000);
+                   int8_t rst_pin = -1, uint32_t preclk = 400000,
+                   uint32_t postclk = 100000);
   Adafruit_SH1106G(uint16_t w, uint16_t h, int8_t mosi_pin, int8_t sclk_pin,
-                  int8_t dc_pin, int8_t rst_pin, int8_t cs_pin);
+                   int8_t dc_pin, int8_t rst_pin, int8_t cs_pin);
   Adafruit_SH1106G(uint16_t w, uint16_t h, SPIClass *spi, int8_t dc_pin,
-                  int8_t rst_pin, int8_t cs_pin, uint32_t bitrate = 8000000UL);
+                   int8_t rst_pin, int8_t cs_pin, uint32_t bitrate = 8000000UL);
 
   ~Adafruit_SH1106G(void);
 
