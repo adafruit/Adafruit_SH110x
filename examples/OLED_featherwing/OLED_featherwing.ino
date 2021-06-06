@@ -1,7 +1,7 @@
 #include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
-#include <Adafruit_SH1107.h>
+#include <Adafruit_SH110X.h>
 
 Adafruit_SH1107 display = Adafruit_SH1107(64, 128, &Wire);
 
