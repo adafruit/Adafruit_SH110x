@@ -146,6 +146,11 @@ bool Adafruit_SH1107::begin(uint8_t addr, bool reset) {
                splash2_data, splash2_width, splash2_height, 1);
     setRotation(0);
   }
+  if (WIDTH == 128 && HEIGHT == 128) {
+    drawBitmap((HEIGHT - splash2_width) / 2, (WIDTH - splash2_height) / 2,
+               splash2_data, splash2_width, splash2_height, 1);
+  }
+
 
   // Init sequence, make sure its under 32 bytes, or split into multiples!
   // clang-format off
@@ -171,6 +176,16 @@ bool Adafruit_SH1107::begin(uint8_t addr, bool reset) {
 
   if (!oled_commandList(init, sizeof(init))) {
     return false;
+  }
+
+  if (WIDTH == 128 && HEIGHT == 128) {
+    static const uint8_t init_128x128[] = {
+      SH110X_SETDISPLAYOFFSET, 0x00,
+      SH110X_SETMULTIPLEX, 0x7F,       // 0xa8, 0x3f,
+    };
+    if (!oled_commandList(init_128x128, sizeof(init_128x128))) {
+      return false;
+    }
   }
 
   delay(100);                     // 100ms delay recommended
