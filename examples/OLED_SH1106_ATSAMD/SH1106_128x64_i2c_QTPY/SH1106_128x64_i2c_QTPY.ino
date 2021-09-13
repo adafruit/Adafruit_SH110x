@@ -141,16 +141,13 @@ void setup()   {
   delay(2000);
   display.clearDisplay();
 
-  // draw scrolling text
-  testscrolltext();
-  delay(2000);
-  display.clearDisplay();
+
 
   // text display tests
   display.setTextSize(1);
   display.setTextColor(SH110X_WHITE);
   display.setCursor(0, 0);
-  display.println("Hello, world!");
+  display.println("Failure is always an option");
   display.setTextColor(SH110X_BLACK, SH110X_WHITE); // 'inverted' text
   display.println(3.141592);
   display.setTextSize(2);
@@ -358,16 +355,4 @@ void testdrawline() {
     delay(1);
   }
   delay(250);
-}
-
-void testscrolltext(void) {
-  display.setTextSize(2);
-  display.setTextColor(SH110X_WHITE);
-  display.setCursor(10, 0);
-  display.clearDisplay();
-  display.println("scroll");
-  display.display();
-  delay(1);
-
-
 }
