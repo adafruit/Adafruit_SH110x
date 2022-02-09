@@ -167,7 +167,6 @@ void Adafruit_SH110X::display(void) {
   uint8_t pages = ((HEIGHT + 7) / 8);
 
   uint8_t bytes_per_page = WIDTH;
-  uint16_t maxbuff = i2c_dev->maxBufferSize() - 1;
 
   /*
   Serial.print("Window: (");
@@ -208,6 +207,8 @@ void Adafruit_SH110X::display(void) {
     bytes_remaining -= (WIDTH - 1) - page_end;
 
     if (i2c_dev) { // I2C
+      uint16_t maxbuff = i2c_dev->maxBufferSize() - 1;
+
       uint8_t cmd[] = {
           0x00, (uint8_t)(SH110X_SETPAGEADDR + p),
           (uint8_t)(0x10 + ((page_start + _page_start_offset) >> 4)),
