@@ -161,7 +161,7 @@ void Adafruit_SH110X::display(void) {
   // 32-byte transfer condition below.
   yield();
 
-  uint16_t count = WIDTH * ((HEIGHT + 7) / 8);
+  // uint16_t count = WIDTH * ((HEIGHT + 7) / 8);
   uint8_t *ptr = buffer;
   uint8_t dc_byte = 0x40;
   uint8_t pages = ((HEIGHT + 7) / 8);
@@ -181,7 +181,7 @@ void Adafruit_SH110X::display(void) {
   */
 
   uint8_t first_page = window_y1 / 8;
-  uint8_t last_page = (window_y2 + 7) / 8;
+  //  uint8_t last_page = (window_y2 + 7) / 8;
   uint8_t page_start = min(bytes_per_page, (uint8_t)window_x1);
   uint8_t page_end = (uint8_t)max((int)0, (int)window_x2);
   /*
