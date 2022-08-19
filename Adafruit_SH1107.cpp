@@ -138,6 +138,7 @@ bool Adafruit_SH1107::begin(uint8_t addr, bool reset) {
 
   setContrast(0x2F);
 
+#ifndef SH110X_NO_SPLASH
   // the featherwing with 128x64 oled is 'rotated' so to make the splash right,
   // rotate!
   if (WIDTH == 64 && HEIGHT == 128) {
@@ -150,6 +151,7 @@ bool Adafruit_SH1107::begin(uint8_t addr, bool reset) {
     drawBitmap((HEIGHT - splash2_width) / 2, (WIDTH - splash2_height) / 2,
                splash2_data, splash2_width, splash2_height, 1);
   }
+#endif
 
   // Init sequence, make sure its under 32 bytes, or split into multiples!
   // clang-format off

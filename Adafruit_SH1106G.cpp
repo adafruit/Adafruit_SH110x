@@ -139,8 +139,10 @@ bool Adafruit_SH1106G::begin(uint8_t addr, bool reset) {
   _page_start_offset =
       2; // the SH1106 display we have found requires a small offset into memory
 
+#ifndef SH110X_NO_SPLASH
   drawBitmap((WIDTH - splash2_width) / 2, (HEIGHT - splash2_height) / 2,
              splash2_data, splash2_width, splash2_height, 1);
+#endif
 
   // Init sequence, make sure its under 32 bytes, or split into multiples!
   // clang-format off
