@@ -41,7 +41,7 @@
             allocation is performed there!
 */
 Adafruit_SH1106G::Adafruit_SH1106G(uint16_t w, uint16_t h, TwoWire *twi,
-                                   int8_t rst_pin, uint32_t clkDuring,
+                                   int16_t rst_pin, uint32_t clkDuring,
                                    uint32_t clkAfter)
     : Adafruit_SH110X(w, h, twi, rst_pin, clkDuring, clkAfter) {}
 
@@ -71,9 +71,9 @@ Adafruit_SH1106G::Adafruit_SH1106G(uint16_t w, uint16_t h, TwoWire *twi,
     @note   Call the object's begin() function before use -- buffer
             allocation is performed there!
 */
-Adafruit_SH1106G::Adafruit_SH1106G(uint16_t w, uint16_t h, int8_t mosi_pin,
-                                   int8_t sclk_pin, int8_t dc_pin,
-                                   int8_t rst_pin, int8_t cs_pin)
+Adafruit_SH1106G::Adafruit_SH1106G(uint16_t w, uint16_t h, int16_t mosi_pin,
+                                   int16_t sclk_pin, int16_t dc_pin,
+                                   int16_t rst_pin, int16_t cs_pin)
     : Adafruit_SH110X(w, h, mosi_pin, sclk_pin, dc_pin, rst_pin, cs_pin) {}
 
 /*!
@@ -102,8 +102,8 @@ Adafruit_SH1106G::Adafruit_SH1106G(uint16_t w, uint16_t h, int8_t mosi_pin,
             allocation is performed there!
 */
 Adafruit_SH1106G::Adafruit_SH1106G(uint16_t w, uint16_t h, SPIClass *spi,
-                                   int8_t dc_pin, int8_t rst_pin, int8_t cs_pin,
-                                   uint32_t bitrate)
+                                   int16_t dc_pin, int16_t rst_pin,
+                                   int16_t cs_pin, uint32_t bitrate)
     : Adafruit_SH110X(w, h, spi, dc_pin, rst_pin, cs_pin, bitrate) {}
 
 /*!

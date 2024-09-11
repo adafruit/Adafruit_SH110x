@@ -74,12 +74,13 @@ class Adafruit_SH110X : public Adafruit_GrayOLED {
 public:
   // NEW CONSTRUCTORS -- recommended for new projects
   Adafruit_SH110X(uint16_t w, uint16_t h, TwoWire *twi = &Wire,
-                  int8_t rst_pin = -1, uint32_t preclk = 400000,
+                  int16_t rst_pin = -1, uint32_t preclk = 400000,
                   uint32_t postclk = 100000);
-  Adafruit_SH110X(uint16_t w, uint16_t h, int8_t mosi_pin, int8_t sclk_pin,
-                  int8_t dc_pin, int8_t rst_pin, int8_t cs_pin);
-  Adafruit_SH110X(uint16_t w, uint16_t h, SPIClass *spi, int8_t dc_pin,
-                  int8_t rst_pin, int8_t cs_pin, uint32_t bitrate = 8000000UL);
+  Adafruit_SH110X(uint16_t w, uint16_t h, int16_t mosi_pin, int16_t sclk_pin,
+                  int16_t dc_pin, int16_t rst_pin, int16_t cs_pin);
+  Adafruit_SH110X(uint16_t w, uint16_t h, SPIClass *spi, int16_t dc_pin,
+                  int16_t rst_pin, int16_t cs_pin,
+                  uint32_t bitrate = 8000000UL);
 
   virtual ~Adafruit_SH110X(void) = 0;
 
@@ -100,12 +101,13 @@ private:
 class Adafruit_SH1106G : public Adafruit_SH110X {
 public:
   Adafruit_SH1106G(uint16_t w, uint16_t h, TwoWire *twi = &Wire,
-                   int8_t rst_pin = -1, uint32_t preclk = 400000,
+                   int16_t rst_pin = -1, uint32_t preclk = 400000,
                    uint32_t postclk = 100000);
-  Adafruit_SH1106G(uint16_t w, uint16_t h, int8_t mosi_pin, int8_t sclk_pin,
-                   int8_t dc_pin, int8_t rst_pin, int8_t cs_pin);
-  Adafruit_SH1106G(uint16_t w, uint16_t h, SPIClass *spi, int8_t dc_pin,
-                   int8_t rst_pin, int8_t cs_pin, uint32_t bitrate = 8000000UL);
+  Adafruit_SH1106G(uint16_t w, uint16_t h, int16_t mosi_pin, int16_t sclk_pin,
+                   int16_t dc_pin, int16_t rst_pin, int16_t cs_pin);
+  Adafruit_SH1106G(uint16_t w, uint16_t h, SPIClass *spi, int16_t dc_pin,
+                   int16_t rst_pin, int16_t cs_pin,
+                   uint32_t bitrate = 8000000UL);
 
   ~Adafruit_SH1106G(void);
 
@@ -119,12 +121,13 @@ public:
 class Adafruit_SH1107 : public Adafruit_SH110X {
 public:
   Adafruit_SH1107(uint16_t w, uint16_t h, TwoWire *twi = &Wire,
-                  int8_t rst_pin = -1, uint32_t preclk = 400000,
+                  int16_t rst_pin = -1, uint32_t preclk = 400000,
                   uint32_t postclk = 100000);
-  Adafruit_SH1107(uint16_t w, uint16_t h, int8_t mosi_pin, int8_t sclk_pin,
-                  int8_t dc_pin, int8_t rst_pin, int8_t cs_pin);
-  Adafruit_SH1107(uint16_t w, uint16_t h, SPIClass *spi, int8_t dc_pin,
-                  int8_t rst_pin, int8_t cs_pin, uint32_t bitrate = 8000000UL);
+  Adafruit_SH1107(uint16_t w, uint16_t h, int16_t mosi_pin, int16_t sclk_pin,
+                  int16_t dc_pin, int16_t rst_pin, int16_t cs_pin);
+  Adafruit_SH1107(uint16_t w, uint16_t h, SPIClass *spi, int16_t dc_pin,
+                  int16_t rst_pin, int16_t cs_pin,
+                  uint32_t bitrate = 8000000UL);
 
   ~Adafruit_SH1107(void);
 
