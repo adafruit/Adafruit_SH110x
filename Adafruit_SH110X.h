@@ -32,7 +32,7 @@
 #define SH110X_INVERSE 2 ///< Invert pixels
 
 // Uncomment to disable Adafruit splash logo
-//#define SH110X_NO_SPLASH
+// #define SH110X_NO_SPLASH
 
 #define SH110X_MEMORYMODE 0x20          ///< See datasheet
 #define SH110X_COLUMNADDR 0x21          ///< See datasheet
