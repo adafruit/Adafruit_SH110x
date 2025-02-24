@@ -10,7 +10,10 @@ Adafruit_SH1107 display = Adafruit_SH1107(64, 128, &Wire);
   #define BUTTON_A  0
   #define BUTTON_B 16
   #define BUTTON_C  2
-#elif defined(ESP32) && !defined(ARDUINO_ADAFRUIT_FEATHER_ESP32S2)
+#elif defined(ESP32) && \
+    !defined(ARDUINO_ADAFRUIT_FEATHER_ESP32S2) && \
+    !defined(ARDUINO_ADAFRUIT_FEATHER_ESP32S3) && \
+    !defined(ARDUINO_ADAFRUIT_FEATHER_ESP32S3_NOPSRAM)
   #define BUTTON_A 15
   #define BUTTON_B 32
   #define BUTTON_C 14
@@ -26,7 +29,7 @@ Adafruit_SH1107 display = Adafruit_SH1107(64, 128, &Wire);
   #define BUTTON_A 31
   #define BUTTON_B 30
   #define BUTTON_C 27
-#else // 32u4, M0, M4, nrf52840, esp32-s2 and 328p
+#else // 32u4, M0, M4, nrf52840, esp32-s2, esp32-s3 and 328p
   #define BUTTON_A  9
   #define BUTTON_B  6
   #define BUTTON_C  5
