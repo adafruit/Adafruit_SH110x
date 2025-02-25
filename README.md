@@ -1,4 +1,4 @@
-[![Build Status](https://github.com/adafruit/Adafruit_SH110X/workflows/Arduino%20Library%20CI/badge.svg)](https://github.com/adafruit/Adafruit_SH110X/actions)
+# Adafruit_SH110x [![Build Status](https://github.com/adafruit/Adafruit_SH110X/workflows/Arduino%20Library%20CI/badge.svg)](https://github.com/adafruit/Adafruit_SH110X/actions) [![Documentation](https://github.com/adafruit/ci-arduino/blob/master/assets/doxygen_badge.svg)](http://adafruit.github.io/Adafruit_SH110x/html/index.html)
 
 This is a library for our Monochrome OLEDs based on SH110X drivers
 
