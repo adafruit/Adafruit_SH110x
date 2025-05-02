@@ -24,6 +24,7 @@
 
 /* Uncomment the initialize the I2C address , uncomment only one, If you get a totally blank screen try the other*/
 #define i2c_Address 0x3c //initialize with the I2C addr 0x3C Typically eBay OLED's
+                         // e.g. the one with GM12864-77 written on it
 //#define i2c_Address 0x3d //initialize with the I2C addr 0x3D Typically Adafruit OLED's
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
@@ -58,6 +59,17 @@ static const unsigned char PROGMEM logo16_glcd_bmp[] =
   B01110000, B01110000,
   B00000000, B00110000
 };
+
+void testdrawbitmap(const uint8_t *bitmap, uint8_t w, uint8_t h);
+void testdrawchar(void);
+void testdrawcircle(void);
+void testfillrect(void);
+void testdrawtriangle(void);
+void testfilltriangle(void);
+void testdrawroundrect(void);
+void testfillroundrect(void);
+void testdrawrect(void);
+void testdrawline();
 
 
 void setup()   {
