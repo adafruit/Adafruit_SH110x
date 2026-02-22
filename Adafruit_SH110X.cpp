@@ -179,9 +179,13 @@ void Adafruit_SH110X::display(void) {
   Serial.print(window_y2);
   Serial.println(")");
   */
+  
+  if (window_x1 > window_x2 || window_y1 > window_y2) {
+    return;
+  }
 
   uint8_t first_page = window_y1 / 8;
-  //  uint8_t last_page = (window_y2 + 7) / 8;
+  uint8_t last_page = (uint8_t)min((int)(pages - 1), (int)(window_y2 / 8));
   uint8_t page_start = min(bytes_per_page, (uint8_t)window_x1);
   uint8_t page_end = (uint8_t)max((int)0, (int)window_x2);
   /*
@@ -189,7 +193,6 @@ void Adafruit_SH110X::display(void) {
   Serial.print(first_page);
   Serial.print(" -> ");
   Serial.println(last_page);
-  pages = min(pages, last_page);
 
   Serial.print("Page addr: ");
   Serial.print(page_start);
@@ -197,7 +200,7 @@ void Adafruit_SH110X::display(void) {
   Serial.println(page_end);
   */
 
-  for (uint8_t p = first_page; p < pages; p++) {
+  for (uint8_t p = first_page; p <= last_page; p++) {
     uint8_t bytes_remaining = bytes_per_page;
     ptr = buffer + (uint16_t)p * (uint16_t)bytes_per_page;
     // fast forward to dirty rectangle beginning
