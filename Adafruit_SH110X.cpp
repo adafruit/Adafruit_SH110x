@@ -179,7 +179,7 @@ void Adafruit_SH110X::display(void) {
   Serial.print(window_y2);
   Serial.println(")");
   */
-  
+
   if (window_x1 > window_x2 || window_y1 > window_y2) {
     return;
   }
