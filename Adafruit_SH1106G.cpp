@@ -134,7 +134,9 @@ Adafruit_SH1106G::~Adafruit_SH1106G(void) {}
 */
 bool Adafruit_SH1106G::begin(uint8_t addr, bool reset) {
 
-  Adafruit_GrayOLED::_init(addr, reset);
+  if (!Adafruit_GrayOLED::_init(addr, reset)) {
+    return false;
+  }
 
   _page_start_offset =
       2; // the SH1106 display we have found requires a small offset into memory
