@@ -134,7 +134,9 @@ Adafruit_SH1107::~Adafruit_SH1107(void) {}
 */
 bool Adafruit_SH1107::begin(uint8_t addr, bool reset) {
 
-  Adafruit_GrayOLED::_init(addr, reset);
+  if (!Adafruit_GrayOLED::_init(addr, reset)) {
+    return false;
+  }
 
   setContrast(0x2F);
 
